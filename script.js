@@ -1,22 +1,65 @@
+const input = document.getElementById("tarefaInput");
+const botaoAdicionar = document.getElementById("addBtn");
+const lista = document.getElementById("listaTarefas");
+
+let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+
+function salvarTarefas() {
+    localStorage.setItem("tarefas", JSON.stringify(tarefas));
+}
+
+function renderizarTarefas() {
+    lista.innerHTML = "";
+
+    tarefas.forEach((tarefa, index) => {
+        const li = document.createElement("li");
+
+        if (tarefa.concluida) {
+            li.classList.add("concluida");
+        }
+
+        li.innerHTML = `
+            <span>${tarefa.texto}</span>
+            <div class="actions">
+                <button class="check" onclick="concluirTarefa(${index})">✔</button>
+                <button onclick="removerTarefa(${index})">✖</button>
+            </div>
+        `;
+
+        lista.appendChild(li);
+    });
+}
+
 function adicionarTarefa() {
-    const input = document.getElementById("tarefaInput");
-    const texto = input.value;
+    const texto = input.value.trim();
 
     if (texto === "") {
         alert("Digite uma tarefa!");
         return;
     }
 
-    const li = document.createElement("li");
-    li.innerHTML = `
-        ${texto}
-        <button onclick="removerTarefa(this)">X</button>
-    `;
+    tarefas.push({
+        texto: texto,
+        concluida: false
+    });
 
-    document.getElementById("listaTarefas").appendChild(li);
     input.value = "";
+    salvarTarefas();
+    renderizarTarefas();
 }
 
-function removerTarefa(botao) {
-    botao.parentElement.remove();
+function removerTarefa(index) {
+    tarefas.splice(index, 1);
+    salvarTarefas();
+    renderizarTarefas();
 }
+
+function concluirTarefa(index) {
+    tarefas[index].concluida = !tarefas[index].concluida;
+    salvarTarefas();
+    renderizarTarefas();
+}
+
+botaoAdicionar.addEventListener("click", adicionarTarefa);
+
+renderizarTarefas();
